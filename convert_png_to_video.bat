@@ -13,21 +13,19 @@ set ext=mp4
 
 for /r %%F in (*.png) do (
    call :ProcessFile %%~nF
-   echo width: !width!
-   echo height: !height!
-   echo duration: !duration:~0,-1!
-   echo fps: !fps:~0,-3!
-   echo bitrate: !bitrate:~0,-4!
-   echo ext: !ext!
-   ffmpeg -loop 1 -i "%%~dF%%~pF%%~nF%%~xF" -c:v libx264 -t !duration:~0,-1! -pix_fmt yuv420p -vf scale=!width!:!height! -r !fps:~0,-3! -b:v !bitrate:~0,-4!k  "%%~dF%%~pF%%~nF.!ext!"
+   if !ext! == mpg ( 
+      call :mpeg2 "%%F"
+   ) else if !ext! == mp4 ( 
+      call :mp4 "%%F"
+   ) else if !ext! == avi (
+      call :avi "%%F"
+   )
 )
 goto :End
 
 :ProcessFile
 set filename="%1"
-echo file:%filename%
 for /F "tokens=1,2,3,4,5,6 delims=-" %%i in (%filename%) do (
-   echo title:%%i
    set duration=%%k
    set fps=%%l
    set bitrate=%%m
@@ -39,11 +37,21 @@ goto:eof
 :ProcessTitle
 set size="%1"
 for /F "tokens=1,2 delims=x" %%i in (%size%) do (
-   echo w:%%i
-   echo h:%%j
    set width=%%i
    set height=%%j
 )
+goto:eof
+
+:mpeg2
+ffmpeg -loop 1 -i "%~d1%~p1%~n1%~x1" -t !duration:~0,-1! -pix_fmt yuv420p -vf scale=!width!:!height! -r !fps:~0,-3! -b:v !bitrate:~0,-4!k -c:v mpeg2video -qscale:v 2 "%~d1%~p1%~n1.mpg"
+goto:eof
+
+:mp4
+ffmpeg -loop 1 -i "%~d1%~p1%~n1%~x1" -c:v libx264 -t !duration:~0,-1! -pix_fmt yuv420p -vf scale=!width!:!height! -r !fps:~0,-3! -b:v !bitrate:~0,-4!k  "%~d1%~p1%~n1.mp4"
+goto:eof
+
+:avi
+ffmpeg -loop 1 -i "%~d1%~p1%~n1%~x1" -c:v libx264 -t !duration:~0,-1! -pix_fmt yuv420p -vf scale=!width!:!height! -r !fps:~0,-3! -b:v !bitrate:~0,-4!k  "%~d1%~p1%~n1.avi"
 goto:eof
 
 :End
