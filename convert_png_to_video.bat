@@ -11,8 +11,6 @@ set fps=25
 set bitrate=4000
 set ext=mp4
 
-echo width:%width%
-
 for /r %%F in (*.png) do (
    call :ProcessFile %%~nF
    echo width: !width!
