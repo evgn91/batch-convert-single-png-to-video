@@ -19,6 +19,10 @@ for /r %%F in (*.png) do (
       call :mp4 "%%F"
    ) else if !ext! == avi (
       call :avi "%%F"
+   ) else if !ext! == xvid (
+      call :xvid "%%F"
+   ) else if !ext! == mov (
+      call :mov "%%F"
    )
 )
 goto :End
@@ -47,11 +51,19 @@ ffmpeg -loop 1 -i "%~d1%~p1%~n1%~x1" -t !duration:~0,-1! -pix_fmt yuv420p -vf sc
 goto:eof
 
 :mp4
-ffmpeg -loop 1 -i "%~d1%~p1%~n1%~x1" -c:v libx264 -t !duration:~0,-1! -pix_fmt yuv420p -vf scale=!width!:!height! -r !fps:~0,-3! -b:v !bitrate:~0,-4!k  "%~d1%~p1%~n1.mp4"
+ffmpeg -loop 1 -i "%~d1%~p1%~n1%~x1" -c:v libx264 -t !duration:~0,-1! -pix_fmt yuv420p -vf scale=!width!:!height! -r !fps:~0,-3! -b:v !bitrate:~0,-4!k -vf "pad=ceil(iw/2)*2:ceil(ih/2)*2" "%~d1%~p1%~n1.mp4"
 goto:eof
 
 :avi
 ffmpeg -loop 1 -i "%~d1%~p1%~n1%~x1" -c:v libx264 -t !duration:~0,-1! -pix_fmt yuv420p -vf scale=!width!:!height! -r !fps:~0,-3! -b:v !bitrate:~0,-4!k  "%~d1%~p1%~n1.avi"
+goto:eof
+
+:xvid
+ffmpeg -loop 1 -i "%~d1%~p1%~n1%~x1" -c:v mpeg4 -vtag xvid -t !duration:~0,-1! -pix_fmt yuv420p -vf scale=!width!:!height! -r !fps:~0,-3! -b:v !bitrate:~0,-4!k  "%~d1%~p1%~n1.avi"
+goto:eof
+
+:mov
+ffmpeg -loop 1 -i "%~d1%~p1%~n1%~x1" -c:v libx264 -t !duration:~0,-1! -pix_fmt yuv420p -vf scale=!width!:!height! -r !fps:~0,-3! -b:v !bitrate:~0,-4!k -f mov  "%~d1%~p1%~n1.mov"
 goto:eof
 
 :End
