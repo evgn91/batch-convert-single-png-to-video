@@ -26,7 +26,8 @@ set bitrate=4000
 set ext=mp4
 
 for /r %%F in (*.png) do (
-   call :ProcessFile %%~nF
+   echo %%~nF
+   call :ProcessFile "%%~nF"
    if !ext! == mpg ( 
       call :mpeg2 "%%F"
    ) else if !ext! == mp4 ( 
@@ -43,7 +44,8 @@ for /r %%F in (*.png) do (
 goto :End
 
 :ProcessFile
-set filename="%1"
+set filename=%1
+echo !filename!
 for /F "tokens=1,2,3,4,5,6 delims=-" %%i in (%filename%) do (
    set duration=%%k
    set fps=%%l
